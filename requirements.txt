@@ -1,0 +1,3 @@
+docopt
+flake8
+ldap3
