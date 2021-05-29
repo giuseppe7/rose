@@ -18,3 +18,9 @@ Use the following to prepare your local environment.
 
 Basic unit tests required. Currently linting is only done with `flake8`.
 
+
+## References
+
+See below for helpful sources.
+
+1. https://ldap3.readthedocs.io/en/latest/index.html
