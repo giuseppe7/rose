@@ -7,7 +7,7 @@ def main():
     '''
     Convenient main method.
     '''
-    print("Hello world")
+    print("Hello world!")
     sys.exit(0)
 
 
