@@ -7,11 +7,18 @@ ROSE stands for "Recursive organizational structure extractor" and was created a
 Use the following to prepare your local environment.
 
 1. Ensure you have the latest `pip` installed.  
-   ```python3 -m pip install --upgrade pip```
+   ```
+   python3 -m pip install --upgrade pip
+   ```
 1. Install `virtualenv` to avoid installing anything globally that may disrupt your other applications.  
-   ```python3 -m pip install --user virtualenv```
+   ```
+   python3 -m pip install --user virtualenv
+   python3 -m venv  ./venv 
+   ```
 1. Run `pip` with the requirements file to locally install necessary modules.  
-   ```pip install -r requirements.txt```
+   ```
+   pip install -r requirements.txt
+   ```
 1. Profit!
 
 ## Contributions
@@ -24,3 +31,4 @@ Basic unit tests required. Currently linting is only done with `flake8`.
 See below for helpful sources.
 
 1. https://ldap3.readthedocs.io/en/latest/index.html
+1. https://www.viget.com/articles/two-ways-to-share-git-hooks-with-your-team/

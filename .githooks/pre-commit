@@ -1,0 +1,5 @@
+#!/bin/sh
+now=$(TZ=GMT date '+%Y%m%d-%H%M%S')
+builds=$(git log main --pretty=oneline | wc -l | xargs)
+echo "${now}-${builds}" > build_number
+git add build_number

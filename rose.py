@@ -2,7 +2,12 @@
 # -*- coding: utf-8 -*-
 """
 Usage:
- rose <sAMAccountName>
+ rose <sAMAccountName> [--detailed]
+
+Options:
+  -h --help      Show this screen.
+  --version      Show version.
+  -d --detailed  Include additional details in output.
 """
 
 from docopt import docopt
@@ -26,7 +31,7 @@ SEARCH_ATTRS = [
     'distinguishedName', 'sAMAccountName', 'userPrincipalName',
     'objectClass', 'objectCategory',
     'cn', 'name', 'title', 'mail', 'department', 'directReports', 'manager']
-# SEARCH_ATTRS = ['*']
+#SEARCH_ATTRS = ['*']
 
 
 # Functions ..................................................................
@@ -50,8 +55,16 @@ def get_person_dn(conn, basedn, sAMAccountName):
         raise Exception("No results found.")
 
 
-def print_person_and_directs(conn, basedn, targetdn, prefix):
-    print('{}{}, {}'.format(prefix, targetdn.name, targetdn.userPrincipalName))
+def print_person_and_directs(conn, basedn, targetdn, prefix, detailed=False):
+    if detailed is True:
+        print('{}"{}", "{}", "{}", "{}"'.format(
+            prefix, targetdn.name,
+            targetdn.userPrincipalName,
+            targetdn.mail,
+            targetdn.title,
+            ))
+    else:
+        print('{}{}'.format(prefix, targetdn.name))
 
     if 'directReports' not in targetdn:
         return
@@ -69,7 +82,9 @@ def print_person_and_directs(conn, basedn, targetdn, prefix):
             attributes=SEARCH_ATTRS)
         if not results:
             break
-        print_person_and_directs(conn, basedn, conn.entries[0], new_prefix)
+        print_person_and_directs(
+            conn, basedn, conn.entries[0], new_prefix, detailed
+            )
 
 
 # Main .......................................................................
@@ -79,8 +94,16 @@ def main():
     '''
     Convenient main method.
     '''
-    arguments = docopt(__doc__)
-    target_person = arguments["<sAMAccountName>"]
+    try:
+        file_path = os.path.dirname(os.path.realpath(__file__))
+        f = open('{}/build_number'.format(file_path), 'r')
+        build_number = f.read().strip()
+    except Exception:
+        build_number = 0
+
+    arguments = docopt(__doc__, version='ROSE v{}'.format(build_number))
+    target_person = arguments['<sAMAccountName>']
+    detailed = arguments['--detailed']
 
     # Pull in host, port information from the environment variables.
     if ENV_HOST not in os.environ or ENV_PORT not in os.environ:
@@ -137,7 +160,7 @@ def main():
     # Perform a basic search to obtain the DN of the given person.
     try:
         dn = get_person_dn(c, target_search_base, target_person)
-        print_person_and_directs(c, target_search_base, dn, "")
+        print_person_and_directs(c, target_search_base, dn, "", detailed)
     except Exception as err:
         print(err)
         sys.exit(1)
