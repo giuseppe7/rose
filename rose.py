@@ -23,7 +23,7 @@ ENV_PWORD = 'ROSE_PWORD'
 ENV_SEARCH_BASE = 'ROSE_SEARCH_BASE'
 
 SEARCH_ATTRS = [
-    'distinguishedName', 'sAMAccountName', 'accountExpires',
+    'distinguishedName', 'sAMAccountName', 'userPrincipalName',
     'objectClass', 'objectCategory',
     'cn', 'name', 'title', 'mail', 'department', 'directReports', 'manager']
 # SEARCH_ATTRS = ['*']
@@ -51,21 +51,23 @@ def get_person_dn(conn, basedn, sAMAccountName):
 
 
 def print_person_and_directs(conn, basedn, targetdn, prefix):
-    print('{}{}'.format(prefix, targetdn.name))
+    print('{}{}, {}'.format(prefix, targetdn.name, targetdn.userPrincipalName))
 
     if 'directReports' not in targetdn:
         return
 
     new_prefix = prefix + '    '
-    for directReport in targetdn.directReports:
+    for directReport in sorted(targetdn.directReports.values):
+        if "DisabledAccounts" in directReport:
+            # TODO: Seems like something that wont be the same for everyone.
+            continue
+
         results = conn.search(
             search_base=directReport,
             search_filter="(objectClass=*)",
             search_scope=ldap3.BASE,
             attributes=SEARCH_ATTRS)
         if not results:
-            break
-        if int(conn.entries[0].accountExpires.value) <= 0:
             break
         print_person_and_directs(conn, basedn, conn.entries[0], new_prefix)
 
@@ -126,10 +128,10 @@ def main():
         sys.exit(1)
     except (LDAPBindError,
             LDAPPasswordIsMandatoryError, LDAPSocketOpenError) as err:
-        print(err)
+        print("LDAP exception occurred:", err)
         sys.exit(1)
     except Exception as err:
-        print(err)
+        print("Exception occurred:", err)
         sys.exit(1)
 
     # Perform a basic search to obtain the DN of the given person.
