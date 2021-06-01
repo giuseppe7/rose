@@ -14,12 +14,24 @@ Use the following to prepare your local environment.
    ```
    python3 -m pip install --user virtualenv
    python3 -m venv  ./venv 
+   source ./venv/bin/activate
    ```
 1. Run `pip` with the requirements file to locally install necessary modules.  
    ```
    pip install -r requirements.txt
    ```
-1. Profit!
+1. Set up your required environment variables `ROSE_HOST`, `ROSE_PORT`, `ROSE_UNAME`, `ROSE_PWORD`, and `ROSE_SEARCH_BASE` for connectivity for the LDAP search.
+
+## Usage
+
+To use the python script, invoke it with a sAMAccountName to perform the organization printout. Use the `--help` option for additional options. 
+
+```
+$ ./rose.py example
+John Hancock
+    Jane Doe
+    John Doe
+```
 
 ## Contributions
 
