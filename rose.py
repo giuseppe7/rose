@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 """
 Usage:
- rose <sAMAccountName> [--detailed]
+ rose <sAMAccountName> [--detailed] [--directsonly]
 
 Options:
   -h --help      Show this screen.
   --version      Show version.
-  -d --detailed  Include additional details in output.
+  --detailed     Include additional details in output.
+  --directsonly  Only list the target and their current directs.
 """
 
 from docopt import docopt
@@ -55,7 +56,7 @@ def get_person_dn(conn, basedn, sAMAccountName):
         raise Exception("No results found.")
 
 
-def print_person_and_directs(conn, basedn, targetdn, prefix, detailed=False):
+def print_person(conn, basedn, targetdn, prefix, detailed):
     if detailed is True:
         print('{}"{}", "{}", "{}", "{}"'.format(
             prefix, targetdn.name,
@@ -65,7 +66,14 @@ def print_person_and_directs(conn, basedn, targetdn, prefix, detailed=False):
             ))
     else:
         print('{}{}'.format(prefix, targetdn.name))
+    return
 
+
+def print_person_and_directs(
+        conn, basedn, targetdn, prefix,
+        detailed=False, directs_only=False):
+
+    print_person(conn, basedn, targetdn, prefix, detailed)
     if 'directReports' not in targetdn:
         return
 
@@ -81,10 +89,14 @@ def print_person_and_directs(conn, basedn, targetdn, prefix, detailed=False):
             search_scope=ldap3.BASE,
             attributes=SEARCH_ATTRS)
         if not results:
-            break
-        print_person_and_directs(
-            conn, basedn, conn.entries[0], new_prefix, detailed
-            )
+            continue  # No results for this direct, continue with the list.
+
+        if directs_only:
+            print_person(conn, basedn, conn.entries[0], new_prefix, detailed)
+        else:
+            print_person_and_directs(
+                conn, basedn, conn.entries[0], new_prefix,
+                detailed, directs_only)
 
 
 # Main .......................................................................
@@ -104,6 +116,7 @@ def main():
     arguments = docopt(__doc__, version='ROSE v{}'.format(build_number))
     target_person = arguments['<sAMAccountName>']
     detailed = arguments['--detailed']
+    directs_only = arguments['--directsonly']
 
     # Pull in host, port information from the environment variables.
     if ENV_HOST not in os.environ or ENV_PORT not in os.environ:
@@ -160,7 +173,9 @@ def main():
     # Perform a basic search to obtain the DN of the given person.
     try:
         dn = get_person_dn(c, target_search_base, target_person)
-        print_person_and_directs(c, target_search_base, dn, "", detailed)
+        print_person_and_directs(
+            c, target_search_base, dn, "", detailed, directs_only)
+
     except Exception as err:
         print(err)
         sys.exit(1)
