@@ -57,6 +57,8 @@ def get_person_dn(conn, basedn, sAMAccountName):
 
 
 def print_person(conn, basedn, targetdn, prefix, detailed):
+    #print(targetdn)
+    #return
     if detailed is True:
         print('{}"{}", "{}", "{}", "{}"'.format(
             prefix, targetdn.name,

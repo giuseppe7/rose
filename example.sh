@@ -1,2 +1,8 @@
 #!/bin/bash
-./rose.py `whoami` --detailed |sed -e 's/  //g' |awk -F "\"*, \"*" '{print $3}'
+
+# All sorts of random fun!
+./rose.py `whoami` --detailed \
+  |sed -e 's/  //g' \
+  |awk -F "\"*, \"*" '{print $3}' \
+  |sort \
+  |perl -pe 's/\n/; /' && echo
