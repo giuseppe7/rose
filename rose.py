@@ -81,7 +81,8 @@ def print_person_and_directs(
 
     new_prefix = prefix + '    '
     for directReport in sorted(targetdn.directReports.values):
-        if "DisabledAccounts" in directReport:
+        matches = ["DisabledAccounts", "Disabled Users"]
+        if any(x in directReport for x in matches):
             # TODO: Seems like something that wont be the same for everyone.
             continue
 
