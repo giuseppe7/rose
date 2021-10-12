@@ -143,7 +143,7 @@ def main():
     try:
         tls_config = ldap3.Tls(
             validate=ssl.CERT_REQUIRED,
-            version=ssl.PROTOCOL_TLSv1)
+            version=ssl.PROTOCOL_TLSv1_2)
 
         s = ldap3.Server(
             target_host,
