@@ -5,7 +5,7 @@ RUN \
   apt-get clean
 
 
-ADD certs/*.crt /usr/local/share/ca-certificates/
+ADD certs/*.pem /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
 ADD rose.py /

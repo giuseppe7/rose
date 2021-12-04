@@ -31,7 +31,8 @@ ENV_SEARCH_BASE = 'ROSE_SEARCH_BASE'
 SEARCH_ATTRS = [
     'distinguishedName', 'sAMAccountName', 'userPrincipalName',
     'objectClass', 'objectCategory',
-    'cn', 'name', 'title', 'mail', 'department', 'directReports', 'manager']
+    'cn', 'name', 'title', 'mail', 'department', 'directReports', 'manager',
+    'memberOf']
 #SEARCH_ATTRS = ['*']
 
 
