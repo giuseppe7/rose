@@ -34,7 +34,7 @@ SEARCH_ATTRS = [
     'objectClass', 'objectCategory',
     'cn', 'name', 'title', 'mail', 'department', 'directReports', 'manager',
     'memberOf']
-#SEARCH_ATTRS = ['*']
+# SEARCH_ATTRS = ['*']
 
 
 # Functions ..................................................................
@@ -78,8 +78,8 @@ def get_person_dn_by_email(conn, basedn, email):
 
 
 def print_person(conn, basedn, targetdn, prefix, detailed):
-    #print(targetdn)
-    #return
+    # print(targetdn)
+    # return
     if detailed is True:
         print('{}"{}", "{}", "{}", "{}"'.format(
             prefix, targetdn.name,
@@ -143,11 +143,8 @@ def print_person_and_above(
     new_prefix = prefix + '    '
     print_person_and_above(conn, basedn, conn.entries[0], new_prefix, detailed)
 
-    
-
 
 # Main .......................................................................
-
 
 def main():
     '''
@@ -222,9 +219,9 @@ def main():
     try:
 
         if "@" in target_person:
-          dn = get_person_dn_by_email(c, target_search_base, target_person)
+            dn = get_person_dn_by_email(c, target_search_base, target_person)
         else:
-          dn = get_person_dn(c, target_search_base, target_person)
+            dn = get_person_dn(c, target_search_base, target_person)
 
         if not reverse:
             print_person_and_directs(
