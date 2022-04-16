@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 """
 Usage:
- rose <sAMAccountName> [--detailed] [--directsonly]
+ rose <person> [--detailed] [--directsonly|--reverse]
 
 Options:
   -h --help      Show this screen.
   --version      Show version.
   --detailed     Include additional details in output.
   --directsonly  Only list the target and their current directs.
+  --reverse      Find the reporting chain above.
 """
 
 from docopt import docopt
@@ -33,7 +34,7 @@ SEARCH_ATTRS = [
     'objectClass', 'objectCategory',
     'cn', 'name', 'title', 'mail', 'department', 'directReports', 'manager',
     'memberOf']
-#SEARCH_ATTRS = ['*']
+# SEARCH_ATTRS = ['*']
 
 
 # Functions ..................................................................
@@ -57,9 +58,28 @@ def get_person_dn(conn, basedn, sAMAccountName):
         raise Exception("No results found.")
 
 
+def get_person_dn_by_email(conn, basedn, email):
+    '''
+    Returns the person's DN given the connection, basedn, and email instead
+    of sAMAccountName
+    '''
+    results = conn.search(
+        basedn,
+        "(&(objectClass=person)(mail={}))".format(email),
+        attributes=SEARCH_ATTRS)
+
+    if results:
+        if len(conn.entries) > 1:
+            # Only expect one result.
+            raise Exception('Found more than one result.')
+        return conn.entries[0]
+    else:
+        raise Exception("No results found.")
+
+
 def print_person(conn, basedn, targetdn, prefix, detailed):
-    #print(targetdn)
-    #return
+    # print(targetdn)
+    # return
     if detailed is True:
         print('{}"{}", "{}", "{}", "{}"'.format(
             prefix, targetdn.name,
@@ -103,8 +123,28 @@ def print_person_and_directs(
                 detailed, directs_only)
 
 
-# Main .......................................................................
+def print_person_and_above(
+        conn, basedn, targetdn, prefix, detailed=False):
 
+    print_person(conn, basedn, targetdn, prefix, detailed)
+    if 'manager' not in targetdn:
+        return
+    elif targetdn.distinguishedname == targetdn.manager:
+        return
+
+    results = conn.search(
+        search_base="{}".format(targetdn.manager),
+        search_filter="(objectClass=*)",
+        search_scope=ldap3.BASE,
+        attributes=SEARCH_ATTRS)
+    if not results:
+        return
+
+    new_prefix = prefix + '    '
+    print_person_and_above(conn, basedn, conn.entries[0], new_prefix, detailed)
+
+
+# Main .......................................................................
 
 def main():
     '''
@@ -118,9 +158,10 @@ def main():
         build_number = 0
 
     arguments = docopt(__doc__, version='ROSE v{}'.format(build_number))
-    target_person = arguments['<sAMAccountName>']
+    target_person = arguments['<person>']
     detailed = arguments['--detailed']
     directs_only = arguments['--directsonly']
+    reverse = arguments['--reverse']
 
     # Pull in host, port information from the environment variables.
     if ENV_HOST not in os.environ or ENV_PORT not in os.environ:
@@ -176,9 +217,19 @@ def main():
 
     # Perform a basic search to obtain the DN of the given person.
     try:
-        dn = get_person_dn(c, target_search_base, target_person)
-        print_person_and_directs(
-            c, target_search_base, dn, "", detailed, directs_only)
+
+        if "@" in target_person:
+            dn = get_person_dn_by_email(c, target_search_base, target_person)
+        else:
+            dn = get_person_dn(c, target_search_base, target_person)
+
+        if not reverse:
+            print_person_and_directs(
+                c, target_search_base, dn, "", detailed, directs_only)
+        else:
+            print_person_and_above(
+                c, target_search_base, dn, "", detailed
+            )
 
     except Exception as err:
         print(err)
