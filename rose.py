@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Usage:
- rose <sAMAccountName> [--detailed] [--directsonly|--reverse]
+ rose <person> [--detailed] [--directsonly|--reverse]
 
 Options:
   -h --help      Show this screen.
@@ -56,6 +56,7 @@ def get_person_dn(conn, basedn, sAMAccountName):
         return conn.entries[0]
     else:
         raise Exception("No results found.")
+
 
 def get_person_dn_by_email(conn, basedn, email):
     '''
@@ -160,7 +161,7 @@ def main():
         build_number = 0
 
     arguments = docopt(__doc__, version='ROSE v{}'.format(build_number))
-    target_person = arguments['<sAMAccountName>']
+    target_person = arguments['<person>']
     detailed = arguments['--detailed']
     directs_only = arguments['--directsonly']
     reverse = arguments['--reverse']
